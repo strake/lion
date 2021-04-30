@@ -27,7 +27,7 @@ data RvfiCsr n = RvfiCsr
 makeLenses ''RvfiCsr
 
 -- | RISC-V Formal Interface
-data Rvfi = Rvfi
+data Rvfi xl = Rvfi
   { _rvfiValid       :: "valid"        ::: Bool
   , _rvfiOrder       :: "order"        ::: BitVector 64
   , _rvfiInsn        :: "insn"         ::: BitVector 32
@@ -38,33 +38,33 @@ data Rvfi = Rvfi
   , _rvfiIxl         :: "ixl"          ::: BitVector 2
   , _rvfiRs1Addr     :: "rs1_addr"     ::: Unsigned 5
   , _rvfiRs2Addr     :: "rs2_addr"     ::: Unsigned 5
-  , _rvfiRs1Data     :: "rs1_rdata"    ::: BitVector 32
-  , _rvfiRs2Data     :: "rs2_rdata"    ::: BitVector 32
+  , _rvfiRs1Data     :: "rs1_rdata"    ::: BitVector xl
+  , _rvfiRs2Data     :: "rs2_rdata"    ::: BitVector xl
   , _rvfiRdAddr      :: "rd_addr"      ::: Unsigned 5
-  , _rvfiRdWData     :: "rd_wdata"     ::: BitVector 32
-  , _rvfiPcRData     :: "pc_rdata"     ::: BitVector 32
-  , _rvfiPcWData     :: "pc_wdata"     ::: BitVector 32
-  , _rvfiMemAddr     :: "mem_addr"     ::: BitVector 32
-  , _rvfiMemRMask    :: "mem_rmask"    ::: BitVector 4
-  , _rvfiMemWMask    :: "mem_wmask"    ::: BitVector 4
-  , _rvfiMemRData    :: "mem_rdata"    ::: BitVector 32
-  , _rvfiMemWData    :: "mem_wdata"    ::: BitVector 32
+  , _rvfiRdWData     :: "rd_wdata"     ::: BitVector xl
+  , _rvfiPcRData     :: "pc_rdata"     ::: BitVector xl
+  , _rvfiPcWData     :: "pc_wdata"     ::: BitVector xl
+  , _rvfiMemAddr     :: "mem_addr"     ::: BitVector xl
+  , _rvfiMemRMask    :: "mem_rmask"    ::: BitVector (Div xl 8)
+  , _rvfiMemWMask    :: "mem_wmask"    ::: BitVector (Div xl 8)
+  , _rvfiMemRData    :: "mem_rdata"    ::: BitVector xl
+  , _rvfiMemWData    :: "mem_wdata"    ::: BitVector xl
   , _rvfiCsrMinstret :: "csr_minstret" ::: RvfiCsr 64
   , _rvfiCsrMcycle   :: "csr_mcycle"   ::: RvfiCsr 64
-  , _rvfiCsrMscratch :: "csr_mscratch" ::: RvfiCsr 32
-  , _rvfiCsrMstatus  :: "csr_mstatus"  ::: RvfiCsr 32
-  , _rvfiCsrMisa     :: "csr_misa"     ::: RvfiCsr 32
+  , _rvfiCsrMscratch :: "csr_mscratch" ::: RvfiCsr xl
+  , _rvfiCsrMstatus  :: "csr_mstatus"  ::: RvfiCsr xl
+  , _rvfiCsrMisa     :: "csr_misa"     ::: RvfiCsr xl
   }
   deriving stock (Generic, Show, Eq)
   deriving anyclass NFDataX
 makeLenses ''Rvfi
 
 -- | Unwrap Rvfi from First monoid
-fromRvfi :: First Rvfi -> Rvfi
+fromRvfi :: KnownNat xl => First (Rvfi xl) -> Rvfi xl
 fromRvfi = fromMaybe mkRvfi . getFirst
 
 -- | Construct the RISC-V Formal Interface
-mkRvfi :: Rvfi 
+mkRvfi :: KnownNat xl => Rvfi xl
 mkRvfi = Rvfi
   { _rvfiValid       = False
   , _rvfiOrder       = 0    
